@@ -10,8 +10,8 @@ class MpsfImageView extends StatelessWidget {
       this.width,
       this.height,
       this.fit: BoxFit.cover,
-      this.format,
-      this.holderImg})
+      this.format = "png",
+      this.holderImg = "images/placeHolder"})
       : super(key: key);
 
   final String image;
@@ -23,13 +23,11 @@ class MpsfImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget placeHolder = MpsfLoadAssetImage(
-      holderImg,
-      height: height,
-      width: width,
-      fit: fit,
-      format: format,
-    );
+    Widget placeHolder = MpsfLoadAssetImage(holderImg,
+        height: height, width: width, fit: fit, format: format);
+
+    Widget assetImage = MpsfLoadAssetImage(image,
+        height: height, width: width, fit: fit, format: format);
 
     if (TextUtil.isEmpty(image) || image == "null") {
       return placeHolder;
@@ -48,7 +46,7 @@ class MpsfImageView extends StatelessWidget {
           fit: fit,
         );
       } else {
-        return placeHolder;
+        return assetImage;
       }
     }
   }

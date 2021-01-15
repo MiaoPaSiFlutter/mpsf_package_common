@@ -36,9 +36,7 @@ abstract class MpsfBaseInnerWidgetState<T extends MpsfBaseInnerWidget>
   @override
   void initState() {
     initBaseCommon(this);
-    setTopBarVisible(true);
-    setAppBarVisible(true);
-    setBackIconHiden(isHiden: true);
+    setBackItemHiden(isHiden: true);
     WidgetsBinding.instance.addObserver(this);
     log("initState");
     onInitDatas();

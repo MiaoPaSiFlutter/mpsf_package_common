@@ -27,6 +27,7 @@ abstract class MpsfBaseWidgetState<T extends MpsfBaseWidget> extends State<T>
   @override
   void initState() {
     initBaseCommon(this);
+    setBackItemHiden(isHiden: false);
     WidgetsBinding.instance.addObserver(this);
     log("initState");
     onInitDatas();

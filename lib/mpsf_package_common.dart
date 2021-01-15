@@ -18,6 +18,7 @@ export 'common_base_screen/mpsf_base_widget.dart';
 /////
 export 'common_widgets/mpsf_card.dart';
 export 'common_widgets/mpsf_imageview.dart';
+export 'common_widgets/mpsf_blankview.dart';
 
 
 

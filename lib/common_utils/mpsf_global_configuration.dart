@@ -14,6 +14,12 @@ class MpsfGlobalConfiguration {
   ///返回键图标
   String backIcon;
 
+  ///无数据图标
+  String blankNoDataIcon;
+
+  ///错误图标
+  String blankErrorIcon;
+
   MpsfGlobalConfiguration._internal() {
     // 初始化
   }

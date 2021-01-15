@@ -2,30 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../mpsf_package_common.dart';
 
-
 abstract class MpsfBaseFunction {
   State _stateBaseFunction;
   BuildContext _contextBaseFunction;
 
-  bool _isTopBarShow = true; //状态栏是否显示
-  bool _isAppBarShow = true; //导航栏是否显示
-
-  Color _topBarColor;
-  Color _appBarColor;
-  Color _appBarContentColor;
-
+  bool _isStatusBarShow = true; //电池栏是否显示
+  bool _isNavigationBarShow = true; //导航栏是否显示
+  //是否显示返回按钮
+  bool _isBackItemShow = false;
   //标题字体大小
-  double _appBarCenterTextSize; //根据需求变更
   String _appBarTitle;
 
   //界面状态
-  PageStatus _pageStatus = PageStatus.STATUS_NODATA;
-  String _tipTitle = "无数据";
-
-  //是否显示返回按钮
-  bool _isBackIconShow = false;
-
-  FontWeight _fontWidget = FontWeight.w600; //错误页面和空页面的字体粗度
+  PageStatusInfoModel _pageStatusInfo = PageStatusInfoModel(
+    status: PageStatus.statusReady,
+  );
 
   void initBaseCommon(State state) {
     _stateBaseFunction = state;
@@ -39,15 +30,14 @@ abstract class MpsfBaseFunction {
       height: double.infinity,
       child: Column(
         children: <Widget>[
-          _isTopBarShow ? _getBaseTopBar(context) : _getHolderWidget(),
-          _isAppBarShow ? _getBaseAppBar(context) : _getHolderWidget(),
+          _getBaseAppBar(context),
           Expanded(
             child: Container(
               color: Theme.of(context).scaffoldBackgroundColor,
               child: Stack(
                 children: <Widget>[
                   _buildProviderWidget(context),
-                  _buildPageStatusWidget(context)
+                  _buildBasePageStatusWidget(context)
                 ],
               ),
             ),
@@ -62,80 +52,118 @@ abstract class MpsfBaseFunction {
     return Container(width: 0, height: 0);
   }
 
-  /////////////🔥TopBar
-  Widget _getBaseTopBar(BuildContext context) {
-    return getTopBar(context);
-  }
-
-  /// subclass can overwrite
-  Widget getTopBar(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: _topBarColor != null ? _topBarColor : themeData.primaryColor,
-      ),
-      height: getTopBarHeight(),
-      width: double.infinity,
-    );
-  }
-
-  double getTopBarHeight() {
-    return MediaQuery.of(_contextBaseFunction).padding.top;
-  }
-
   /////////////🔥AppBar
   Widget _getBaseAppBar(BuildContext context) {
     return getAppBar(context);
   }
 
   Widget getAppBar(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
     return Container(
-      decoration: BoxDecoration(
-        color: _appBarColor != null ? _appBarColor : themeData.primaryColor,
-      ),
       height: getAppBarHeight(),
-      width: double.infinity,
-      child: Row(
-        children: <Widget>[
-          getAppBarLeft(context),
-          Expanded(child: getAppBarCenter(context)),
-          getAppBarRight(context)
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+          ),
+          Container(
+            child: Column(
+              children: <Widget>[
+                _isStatusBarShow
+                    ? _getBaseStatusBar(context)
+                    : _getHolderWidget(),
+                _isNavigationBarShow
+                    ? _getBaseNavigationBar(context)
+                    : _getHolderWidget(),
+              ],
+            ),
+          )
         ],
       ),
     );
   }
 
-  ///导航栏appBar左边部分 ，不满足可以自行重写
-  Widget getAppBarLeft(BuildContext context) {
-    Widget child;
-    if (_isBackIconShow) {
-      if (TextUtil.isEmpty(MpsfGlobalConfiguration.instance.backIcon)) {
-        child = IconButton(
-          onPressed: clickAppBarBack,
-          tooltip: 'Back',
-          icon: Icon(Icons.arrow_back),
-        );
-      } else {
-        child = GestureDetector(
-          onTap: clickAppBarBack,
-          child: MpsfImageView(
-            MpsfGlobalConfiguration.instance.backIcon,
-            fit: BoxFit.scaleDown,
-          ),
-        );
-      }
-    }
+  /////////////🔥StatusBar
+  Widget _getBaseStatusBar(BuildContext context) {
+    return getStatusBar(context);
+  }
 
+  /// subclass can overwrite
+  Widget getStatusBar(BuildContext context) {
     return Container(
-      width: getAppBarHeight(),
+      width: double.infinity,
+      height: getStatusBarHeight(),
+    );
+  }
+
+  /////////////🔥NavigationBar
+  Widget _getBaseNavigationBar(BuildContext context) {
+    return getNavigationBar(context);
+  }
+
+  Widget getNavigationBar(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: getNavigationBarHeight(),
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: getNavigationBarLeftItems(context),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: getNavigationBarRightItems(context),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: getAppBarCenter(context),
+          )
+        ],
+      ),
+    );
+  }
+
+  ///导航栏左边部分 ，不满足可以自行重写
+  Widget getNavigationBarLeftItems(BuildContext context) {
+    List<Widget> children = [];
+    if (_isBackItemShow) {
+      Widget backItem = getBackItem(context);
+      children.add(backItem);
+    }
+    return Container(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+
+  ///导航栏返回键
+  Widget getBackItem(BuildContext context) {
+    Widget child;
+    if (TextUtil.isEmpty(MpsfGlobalConfiguration.instance.backIcon)) {
+      child = IconButton(
+        onPressed: clickBackItem,
+        icon: Icon(Icons.arrow_back),
+      );
+    } else {
+      child = GestureDetector(
+        onTap: clickBackItem,
+        child: MpsfImageView(
+          MpsfGlobalConfiguration.instance.backIcon,
+          fit: BoxFit.scaleDown,
+        ),
+      );
+    }
+    return Container(
+      width: getNavigationBarHeight(),
       height: double.infinity,
       child: child,
     );
   }
 
-  void clickAppBarBack() {
-    log("---⬅️clickAppBarBack");
+  void clickBackItem() {
+    log("---clickBackItem");
     finish();
   }
 
@@ -149,22 +177,24 @@ abstract class MpsfBaseFunction {
     }
   }
 
+  ///导航栏右边部分 ，不满足可以自行重写
+  Widget getNavigationBarRightItems(BuildContext context) {
+    List<Widget> children = [];
+    return Container(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+
   ///导航栏appBar中间部分 ，不满足可以自行重写
   Widget getAppBarCenter(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
     return Container(
       child: Text(
         _appBarTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: _appBarCenterTextSize != null
-              ? _appBarCenterTextSize
-              : themeData.textTheme.headline1.fontSize,
-          color: _appBarContentColor != null
-              ? _appBarContentColor
-              : themeData.textTheme.headline1.color,
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(context).textTheme.headline1,
       ),
     );
   }
@@ -172,94 +202,8 @@ abstract class MpsfBaseFunction {
   ///导航栏appBar右侧部分 ，不满足可以自行重写
   Widget getAppBarRight(BuildContext context) {
     return Container(
-      width: getAppBarHeight(),
+      width: getNavigationBarHeight(),
       height: double.infinity,
-    );
-  }
-
-  ///////////////////////////////////////////
-  ////////////  PageStatus   ///////////////
-  ///////////////////////////////////////////
-
-  /////////////🔥LoadingWidget
-  Widget _getBaseLoadingWidget(BuildContext context) {
-    return getLoadingWidget(context);
-  }
-
-  Widget getLoadingWidget(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 100),
-      color: Theme.of(context).scaffoldBackgroundColor,
-      width: double.infinity,
-      height: double.infinity,
-      child: Center(
-        child: CircularProgressIndicator(
-          // 圆形进度条
-          strokeWidth: 4.0,
-          backgroundColor: Colors.blue,
-          valueColor: AlwaysStoppedAnimation<Color>(_appBarColor),
-        ),
-      ),
-    );
-  }
-
-  /////////////🔥ErrorWidget
-  Widget _getBaseErrorWidget(BuildContext context) {
-    return getErrorWidget(context);
-  }
-
-  Widget getErrorWidget(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
-      color: Theme.of(context).scaffoldBackgroundColor,
-      width: double.infinity,
-      height: double.infinity,
-      child: Center(
-        child: InkWell(
-          onTap: onClickErrorWidget,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  child: Text(_tipTitle,
-                      style: TextStyle(fontWeight: _fontWidget))),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void onClickErrorWidget() {
-    onFetchData(); //此处 默认onResume 就是 调用网络请求，
-  }
-
-  /////////////🔥EmptyWidget
-  Widget _getBaseNoDataWidget(BuildContext context) {
-    return getNoDataWidget(context);
-  }
-
-  Widget getNoDataWidget(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
-      color: Theme.of(context).scaffoldBackgroundColor,
-      width: double.infinity,
-      height: double.infinity,
-      child: Center(
-        child: Container(
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  child: Text(_tipTitle,
-                      style: TextStyle(fontWeight: _fontWidget)))
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -273,8 +217,18 @@ abstract class MpsfBaseFunction {
     return MediaQuery.of(_contextBaseFunction).size.height;
   }
 
-  ///返回appbar高度，也就是导航栏高度
+  ///返回AppBar高度
   double getAppBarHeight() {
+    return getStatusBarHeight() + getNavigationBarHeight();
+  }
+
+  ///返回电池栏高度
+  double getStatusBarHeight() {
+    return MediaQuery.of(_contextBaseFunction).padding.top;
+  }
+
+  ///返回导航栏高度
+  double getNavigationBarHeight() {
     return 44;
   }
 
@@ -284,48 +238,19 @@ abstract class MpsfBaseFunction {
   }
 
   ///设置状态栏隐藏或者显示
-  void setTopBarVisible(bool isVisible) {
+  void setStatusBarVisible(bool isVisible) {
     if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
       _stateBaseFunction.setState(() {
-        _isTopBarShow = isVisible;
+        _isStatusBarShow = isVisible;
       });
-    }
-  }
-
-  ///默认这个状态栏下，设置颜色
-  void setTopBarBackColor(Color color) {
-    if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
-      _stateBaseFunction.setState(() {
-        _topBarColor = color == null ? _topBarColor : color;
-      });
-    }
-  }
-
-  ///设置导航栏的字体以及图标颜色
-  void setAppBarContentColor(Color contentColor) {
-    if (contentColor != null) {
-      if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
-        _stateBaseFunction.setState(() {
-          _appBarContentColor = contentColor;
-        });
-      }
     }
   }
 
   ///设置导航栏隐藏或者显示
-  void setAppBarVisible(bool isVisible) {
+  void setNavigationBarVisible(bool isVisible) {
     if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
       _stateBaseFunction.setState(() {
-        _isAppBarShow = isVisible;
-      });
-    }
-  }
-
-  ///默认这个导航栏下，设置颜色
-  void setAppBarBackColor(Color color) {
-    if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
-      _stateBaseFunction.setState(() {
-        _appBarColor = color == null ? _appBarColor : color;
+        _isNavigationBarShow = isVisible;
       });
     }
   }
@@ -341,33 +266,35 @@ abstract class MpsfBaseFunction {
   }
 
   ///设置页面状态
-  void setPageStatus(PageStatus status) {
+  void setPageStatus(int status) {
     if (status != null) {
       if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
-        // ignore: invalid_use_of_protected_member
         _stateBaseFunction.setState(() {
-          _pageStatus = status;
+          _pageStatusInfo.status = status;
         });
       }
     }
   }
 
   ///设置tipTitle
-  void setTipTitle(String title) {
-    if (title != null) {
+  void setPageStatusInfo(
+      {int status, String title, String subTitle, String icon}) {
+    if (title != null || subTitle != null || icon != null) {
       if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
-        _stateBaseFunction.setState(() {
-          _tipTitle = title;
-        });
+        if (status != null) _pageStatusInfo.status = status;
+        if (title != null) _pageStatusInfo.title = title;
+        if (subTitle != null) _pageStatusInfo.subTitle = subTitle;
+        if (icon != null) _pageStatusInfo.icon = icon;
+        _stateBaseFunction.setState(() {});
       }
     }
   }
 
-  void setBackIconHiden({bool isHiden = true}) {
+  void setBackItemHiden({bool isHiden = true}) {
     // ignore: invalid_use_of_protected_member
     if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
       _stateBaseFunction.setState(() {
-        _isBackIconShow = !isHiden;
+        _isBackItemShow = !isHiden;
       });
     }
   }
@@ -425,22 +352,45 @@ abstract class MpsfBaseFunction {
     return buildWidget(context);
   }
 
-  _buildPageStatusWidget(BuildContext context) {
-    switch (_pageStatus) {
-      case PageStatus.STATUS_LOADING: //请求中
-        return _getBaseLoadingWidget(context);
+  _buildBasePageStatusWidget(BuildContext context) {
+    return buildPageStatusWidget(context);
+  }
+
+  Widget buildPageStatusWidget(BuildContext context) {
+    Widget child;
+
+    switch (_pageStatusInfo.status) {
+      case PageStatus.statusLoading: //请求中
+        child = MpsfBlankLodingView(
+          info: _pageStatusInfo,
+        );
         break;
-      case PageStatus.SERVER_ERROR: //错误
-        return _getBaseErrorWidget(context);
+      case PageStatus.statusError: //错误
+        child = MpsfBlankErrorView(
+          info: _pageStatusInfo,
+        );
         break;
-      case PageStatus.STATUS_NODATA: //空数据
-        return _getBaseNoDataWidget(context);
+      case PageStatus.statusNoData: //空数据
+        child = MpsfBlankNoDataView(
+          info: _pageStatusInfo,
+        );
         break;
-      case PageStatus.STATUS_READY: //就绪
-        return _getHolderWidget();
+      case PageStatus.statusReady: //就绪
+        child = MpsfBlankReadyView(
+          info: _pageStatusInfo,
+        );
         break;
       default:
     }
+
+    return GestureDetector(
+      onTap: () {
+        onFetchData();
+      },
+      child: Container(
+        child: child,
+      ),
+    );
   }
 
   String getClassName() {
@@ -454,12 +404,4 @@ abstract class MpsfBaseFunction {
     className = className.substring(0, className.indexOf("("));
     return className;
   }
-}
-
-/// 界面状态
-enum PageStatus {
-  STATUS_LOADING, //请求中
-  SERVER_ERROR, //请求错误
-  STATUS_READY, //就绪
-  STATUS_NODATA, //空数据
 }
