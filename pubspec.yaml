@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-    # Flutter 常用工具类库 https://github.com/Sky24n/flustars
+  # Flutter 常用工具类库 https://github.com/Sky24n/flustars
   flustars: ^0.3.3
   # 图片加载
   cached_network_image: ^2.3.2+1

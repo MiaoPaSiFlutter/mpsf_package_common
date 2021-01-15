@@ -207,6 +207,136 @@ abstract class MpsfBaseFunction {
     );
   }
 
+  ///////////////////////////////////////////
+  ////////////  PageStatus   ///////////////
+  ///////////////////////////////////////////
+  buildPageStatusWidget(BuildContext context) {
+    Widget child;
+    switch (_pageStatusInfo.status) {
+      case PageStatus.statusLoading: //请求中
+        child = getLoadingWidget(context);
+        break;
+      case PageStatus.statusError: //错误
+        child = getErrorWidget(context);
+        break;
+      case PageStatus.statusNoData: //空数据
+        child = getNoDataWidget(context);
+        break;
+      case PageStatus.statusReady: //就绪
+        child = _getHolderWidget();
+        break;
+      default:
+    }
+
+    return GestureDetector(
+      onTap: () {
+        onFetchData();
+      },
+      child: Container(
+        child: child,
+      ),
+    );
+  }
+
+  /////////////🔥LoadingWidget
+  Widget getLoadingWidget(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 4.0,
+          backgroundColor: Colors.blue,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+      ),
+    );
+  }
+
+  /////////////🔥ErrorWidget
+  Widget getErrorWidget(BuildContext context) {
+    Widget iconchild;
+    String icon;
+    if (!TextUtil.isEmpty(_pageStatusInfo.icon)) {
+      icon = _pageStatusInfo.icon;
+    } else {
+      icon = MpsfGlobalConfiguration.instance.blankErrorIcon;
+    }
+    if (!TextUtil.isEmpty(icon)) {
+      iconchild = MpsfImageView(icon, fit: BoxFit.scaleDown);
+    } else {
+      iconchild = Container();
+    }
+    return Container(
+      padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
+        child: InkWell(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              iconchild,
+              Container(
+                margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: Text(
+                  _pageStatusInfo.title ?? "请求失败",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /////////////🔥EmptyWidget
+  Widget getNoDataWidget(BuildContext context) {
+    Widget iconchild;
+    String icon;
+    if (!TextUtil.isEmpty(_pageStatusInfo.icon)) {
+      icon = _pageStatusInfo.icon;
+    } else {
+      icon = MpsfGlobalConfiguration.instance.blankNoDataIcon;
+    }
+    if (!TextUtil.isEmpty(icon)) {
+      iconchild = Container(
+        width: 120,
+        child: MpsfImageView(icon, fit: BoxFit.contain),
+      );
+    } else {
+      iconchild = Container();
+    }
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
+        child: InkWell(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              iconchild,
+              Container(
+                margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: Text(
+                  _pageStatusInfo.title ?? "暂无数据",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   ///返回屏幕宽度
   double getScreenWidth() {
     return MediaQuery.of(_contextBaseFunction).size.width;
@@ -354,43 +484,6 @@ abstract class MpsfBaseFunction {
 
   _buildBasePageStatusWidget(BuildContext context) {
     return buildPageStatusWidget(context);
-  }
-
-  Widget buildPageStatusWidget(BuildContext context) {
-    Widget child;
-
-    switch (_pageStatusInfo.status) {
-      case PageStatus.statusLoading: //请求中
-        child = MpsfBlankLodingView(
-          info: _pageStatusInfo,
-        );
-        break;
-      case PageStatus.statusError: //错误
-        child = MpsfBlankErrorView(
-          info: _pageStatusInfo,
-        );
-        break;
-      case PageStatus.statusNoData: //空数据
-        child = MpsfBlankNoDataView(
-          info: _pageStatusInfo,
-        );
-        break;
-      case PageStatus.statusReady: //就绪
-        child = MpsfBlankReadyView(
-          info: _pageStatusInfo,
-        );
-        break;
-      default:
-    }
-
-    return GestureDetector(
-      onTap: () {
-        onFetchData();
-      },
-      child: Container(
-        child: child,
-      ),
-    );
   }
 
   String getClassName() {
