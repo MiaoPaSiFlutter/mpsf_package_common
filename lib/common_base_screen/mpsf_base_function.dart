@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../mpsf_package_common.dart';
 
+class BlankPageStatus {
+  static const int statusReady = 0; //就绪
+  static const int statusLoading = 1; //请求中
+  static const int statusNoData = 2; //空数据
+  static const int statusError = 3; //请求错误
+}
+
+
 abstract class MpsfBaseFunction {
   State _stateBaseFunction;
   BuildContext _contextBaseFunction;
@@ -14,9 +22,7 @@ abstract class MpsfBaseFunction {
   String _appBarTitle;
 
   //界面状态
-  PageStatusInfoModel _pageStatusInfo = PageStatusInfoModel(
-    status: PageStatus.statusReady,
-  );
+  int _blankStatus = BlankPageStatus.statusReady;
 
   void initBaseCommon(State state) {
     _stateBaseFunction = state;
@@ -37,7 +43,7 @@ abstract class MpsfBaseFunction {
               child: Stack(
                 children: <Widget>[
                   _buildProviderWidget(context),
-                  _buildBasePageStatusWidget(context)
+                  _buildBaseBlankPageStatusWidget(context)
                 ],
               ),
             ),
@@ -140,25 +146,13 @@ abstract class MpsfBaseFunction {
 
   ///导航栏返回键
   Widget getBackItem(BuildContext context) {
-    Widget child;
-    if (TextUtil.isEmpty(MpsfGlobalConfiguration.instance.backIcon)) {
-      child = IconButton(
-        onPressed: clickBackItem,
-        icon: Icon(Icons.arrow_back),
-      );
-    } else {
-      child = GestureDetector(
-        onTap: clickBackItem,
-        child: MpsfImageView(
-          MpsfGlobalConfiguration.instance.backIcon,
-          fit: BoxFit.scaleDown,
-        ),
-      );
-    }
     return Container(
       width: getNavigationBarHeight(),
       height: double.infinity,
-      child: child,
+      child: IconButton(
+        onPressed: clickBackItem,
+        icon: Icon(Icons.arrow_back),
+      ),
     );
   }
 
@@ -208,21 +202,21 @@ abstract class MpsfBaseFunction {
   }
 
   ///////////////////////////////////////////
-  ////////////  PageStatus   ///////////////
+  ////////////  BlankPageStatus   ///////////////
   ///////////////////////////////////////////
-  buildPageStatusWidget(BuildContext context) {
+  buildBlankPageStatusWidget(BuildContext context) {
     Widget child;
-    switch (_pageStatusInfo.status) {
-      case PageStatus.statusLoading: //请求中
+    switch (_blankStatus) {
+      case BlankPageStatus.statusLoading: //请求中
         child = getLoadingWidget(context);
         break;
-      case PageStatus.statusError: //错误
+      case BlankPageStatus.statusError: //错误
         child = getErrorWidget(context);
         break;
-      case PageStatus.statusNoData: //空数据
+      case BlankPageStatus.statusNoData: //空数据
         child = getNoDataWidget(context);
         break;
-      case PageStatus.statusReady: //就绪
+      case BlankPageStatus.statusReady: //就绪
         child = _getHolderWidget();
         break;
       default:
@@ -257,20 +251,8 @@ abstract class MpsfBaseFunction {
 
   /////////////🔥ErrorWidget
   Widget getErrorWidget(BuildContext context) {
-    Widget iconchild;
-    String icon;
-    if (!TextUtil.isEmpty(_pageStatusInfo.icon)) {
-      icon = _pageStatusInfo.icon;
-    } else {
-      icon = MpsfGlobalConfiguration.instance.blankErrorIcon;
-    }
-    if (!TextUtil.isEmpty(icon)) {
-      iconchild = MpsfImageView(icon, fit: BoxFit.scaleDown);
-    } else {
-      iconchild = Container();
-    }
     return Container(
-      padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
+      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
       color: Theme.of(context).scaffoldBackgroundColor,
       width: double.infinity,
       height: double.infinity,
@@ -279,11 +261,9 @@ abstract class MpsfBaseFunction {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              iconchild,
               Container(
-                margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                 child: Text(
-                  _pageStatusInfo.title ?? "请求失败",
+                  "请求失败",
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               )
@@ -296,24 +276,8 @@ abstract class MpsfBaseFunction {
 
   /////////////🔥EmptyWidget
   Widget getNoDataWidget(BuildContext context) {
-    Widget iconchild;
-    String icon;
-    if (!TextUtil.isEmpty(_pageStatusInfo.icon)) {
-      icon = _pageStatusInfo.icon;
-    } else {
-      icon = MpsfGlobalConfiguration.instance.blankNoDataIcon;
-    }
-    if (!TextUtil.isEmpty(icon)) {
-      iconchild = Container(
-        width: 120,
-        child: MpsfImageView(icon, fit: BoxFit.contain),
-      );
-    } else {
-      iconchild = Container();
-    }
-
     return Container(
-      padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
+      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
       color: Theme.of(context).scaffoldBackgroundColor,
       width: double.infinity,
       height: double.infinity,
@@ -322,11 +286,9 @@ abstract class MpsfBaseFunction {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              iconchild,
               Container(
-                margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                 child: Text(
-                  _pageStatusInfo.title ?? "暂无数据",
+                  "暂无数据",
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               )
@@ -396,26 +358,12 @@ abstract class MpsfBaseFunction {
   }
 
   ///设置页面状态
-  void setPageStatus(int status) {
+  void setBlankStatus({int status}) {
     if (status != null) {
       if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
         _stateBaseFunction.setState(() {
-          _pageStatusInfo.status = status;
+          _blankStatus = status;
         });
-      }
-    }
-  }
-
-  ///设置tipTitle
-  void setPageStatusInfo(
-      {int status, String title, String subTitle, String icon}) {
-    if (title != null || subTitle != null || icon != null) {
-      if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
-        if (status != null) _pageStatusInfo.status = status;
-        if (title != null) _pageStatusInfo.title = title;
-        if (subTitle != null) _pageStatusInfo.subTitle = subTitle;
-        if (icon != null) _pageStatusInfo.icon = icon;
-        _stateBaseFunction.setState(() {});
       }
     }
   }
@@ -482,8 +430,8 @@ abstract class MpsfBaseFunction {
     return buildWidget(context);
   }
 
-  _buildBasePageStatusWidget(BuildContext context) {
-    return buildPageStatusWidget(context);
+  _buildBaseBlankPageStatusWidget(BuildContext context) {
+    return buildBlankPageStatusWidget(context);
   }
 
   String getClassName() {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class MpsfCommonUtil {
+class MpsfUtil {
   ///计算页数
   static int calculatePageCount(int totalCount, int pageSize) {
     return (totalCount + pageSize - 1) ~/ pageSize;
