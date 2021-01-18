@@ -9,7 +9,6 @@ class BlankPageStatus {
   static const int statusError = 3; //请求错误
 }
 
-
 abstract class MpsfBaseFunction {
   State _stateBaseFunction;
   BuildContext _contextBaseFunction;
@@ -68,9 +67,7 @@ abstract class MpsfBaseFunction {
       height: getAppBarHeight(),
       child: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-          ),
+          _getBaseAppBarBackground(context),
           Container(
             child: Column(
               children: <Widget>[
@@ -84,6 +81,22 @@ abstract class MpsfBaseFunction {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  /////////////🔥StatusBar
+  Widget _getBaseAppBarBackground(BuildContext context) {
+    return getBaseAppBarBackground(context);
+  }
+
+  Widget getBaseAppBarBackground(BuildContext context) {
+    Color bgColor = Theme.of(context).primaryColor;
+    Color dividerColor = Theme.of(context).dividerColor;
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        border: Border(bottom: BorderSide(color: dividerColor)),
       ),
     );
   }
