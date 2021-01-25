@@ -236,12 +236,10 @@ abstract class MpsfBaseFunction {
     }
 
     return GestureDetector(
+      child: Container(child: child),
       onTap: () {
         onFetchData();
       },
-      child: Container(
-        child: child,
-      ),
     );
   }
 
