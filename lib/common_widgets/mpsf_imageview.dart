@@ -54,9 +54,15 @@ class MpsfImageView extends StatelessWidget {
 
 /// 加载本地资源图片
 class MpsfLoadAssetImage extends StatelessWidget {
-  const MpsfLoadAssetImage(this.image,
-      {Key key, this.width, this.height, this.fit, this.format, this.color})
-      : super(key: key);
+  const MpsfLoadAssetImage(
+    this.image, {
+    Key key,
+    this.width,
+    this.height,
+    this.fit,
+    this.format = 'png',
+    this.color,
+  }) : super(key: key);
 
   final String image;
   final double width;

@@ -413,7 +413,7 @@ abstract class MpsfBaseFunction {
   }
 
   void log(String content) {
-    print(getWidgetName() + "------:" + content);
+    MpsfLogUtils.e(getWidgetName() + "------:" + content);
   }
 
   String getWidgetName() {
