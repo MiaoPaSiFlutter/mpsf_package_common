@@ -42,7 +42,7 @@ abstract class MpsfCommonFunction {
   }
 
   void clickBackItem() {
-    log("---clickBackItem");
+    mpsf_log("---clickBackItem");
     finish();
   }
 
@@ -89,7 +89,7 @@ abstract class MpsfCommonFunction {
   ///只要页面来到栈顶， 都会调用此方法，网络请求可以放在这个方法
   void onFetchData();
 
-  void log(String content) {
+  void mpsf_log(String content) {
     MpsfLogUtils.e(getWidgetName() + "------:" + content);
   }
 
