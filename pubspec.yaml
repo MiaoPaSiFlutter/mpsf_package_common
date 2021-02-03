@@ -16,7 +16,8 @@ dependencies:
   flustars: ^0.3.3
   # 图片加载
   cached_network_image: ^2.3.2+1
-
+  # 获取应用包信息
+  package_info: ^0.4.3+4
 
 dev_dependencies:
   flutter_test:
